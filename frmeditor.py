@@ -17,14 +17,14 @@ print(np.max(wholefrm))
 header = wholefrm[0:62]
 framedata = wholefrm[62:len(wholefrm)]
 if isFRM:
-    numframes = 6*(header[8]*256+header[9])
+    numframes = 6*(int(header[8])*256+int(header[9]))
 else:
-    numframes = (header[8]*256+header[9])
+    numframes = (int(header[8])*256+int(header[9]))
 print("Number of frames = "+str(numframes))
 outdata = header
 
 for frame in range(numframes):
-    framesize = framedata[4]*(256**3)+framedata[5]*(256**2)+framedata[6]*256+framedata[7]
+    framesize = int(framedata[4])*(256**3)+int(framedata[5])*(256**2)+int(framedata[6])*256+int(framedata[7])
     print("Frame "+str(frame)+" size = "+str(framesize))
     if frame < numframes-1:
         currentframe = framedata[0:12+framesize]
