@@ -31,12 +31,11 @@ def get_total_frames(frm_bytes, frm_type):
     frame_count = struct.unpack(">H", frm_bytes[8:10])[0]
     return frame_count if frm_is_single_direction(frm_type) else frame_count * 6
 
-def parse_frames(frm_bytes):
+def parse_frames(frm_bytes, frm_type):
     header = frm_bytes[:62]
     offset = 62
     frames = []
-
-    total = get_total_frames(frm_bytes, frm_type="")
+    total = get_total_frames(frm_bytes, frm_type)
     for _ in range(total):
         width, height = struct.unpack(">HH", frm_bytes[offset:offset + 4])
         size = width * height
@@ -118,14 +117,33 @@ class RecolourApp:
         #tk.Button(nav_frame, text="→", command=self.next_frame).pack(side="left", padx=5)
 
         self.prev5_btn = tk.Button(nav_frame, text="⏴×5", font=("Arial", 16), command=lambda: self.change_frame(-5))
-        self.prev1_btn = tk.Button(nav_frame, text="←", font=("Arial", 20, "bold"), command=lambda: self.change_frame(-1))
-        self.next1_btn = tk.Button(nav_frame, text="→", font=("Arial", 20, "bold"), command=lambda: self.change_frame(1))
+        self.prev1_btn = tk.Button(nav_frame, text="←", font=("Arial", 16, "bold"), command=lambda: self.change_frame(-1))
+        self.next1_btn = tk.Button(nav_frame, text="→", font=("Arial", 16, "bold"), command=lambda: self.change_frame(1))
         self.next5_btn = tk.Button(nav_frame, text="×5⏵", font=("Arial", 16), command=lambda: self.change_frame(5))
 
-        self.prev5_btn.grid(row=0, column=0, padx=15)
-        self.prev1_btn.grid(row=0, column=1, padx=15)
-        self.next1_btn.grid(row=0, column=2, padx=15)
-        self.next5_btn.grid(row=0, column=3, padx=15)
+        #fr05_frame = tk.Frame(nav_frame)
+        #fr05_frame.pack()
+        
+        self.prev5_btn.grid(row=0, column=0, rowspan = 2, padx=15)
+        self.prev1_btn.grid(row=0, column=1, rowspan = 2, padx=15)
+        self.next1_btn.grid(row=0, column=2, rowspan = 2, padx=15)
+        self.next5_btn.grid(row=0, column=3, rowspan = 2, padx=15)
+        #fr05_frame.grid(row=0, column=4, padx=15)
+        
+        tk.Button(nav_frame, text="Load FR0", command=self.load_fr0).grid(row=0, column=4, padx=5)
+        tk.Button(nav_frame, text="Save FR0", command=self.save_fr0).grid(row=1, column=4, padx=5)
+        tk.Button(nav_frame, text="Load FR1", command=self.load_fr1).grid(row=0, column=5, padx=5)
+        tk.Button(nav_frame, text="Save FR1", command=self.save_fr1).grid(row=1, column=5, padx=5)
+        tk.Button(nav_frame, text="Load FR2", command=self.load_fr2).grid(row=0, column=6, padx=5)
+        tk.Button(nav_frame, text="Save FR2", command=self.save_fr2).grid(row=1, column=6, padx=5)
+        tk.Button(nav_frame, text="Load FR3", command=self.load_fr3).grid(row=0, column=7, padx=5)
+        tk.Button(nav_frame, text="Save FR3", command=self.save_fr3).grid(row=1, column=7, padx=5)
+        tk.Button(nav_frame, text="Load FR4", command=self.load_fr4).grid(row=0, column=8, padx=5)
+        tk.Button(nav_frame, text="Save FR4", command=self.save_fr4).grid(row=1, column=8, padx=5)
+        tk.Button(nav_frame, text="Load FR5", command=self.load_fr5).grid(row=0, column=9, padx=5)
+        tk.Button(nav_frame, text="Save FR5", command=self.save_fr5).grid(row=1, column=9, padx=5)
+        
+        
         self.canvas_orig = tk.Canvas(self.root)
         self.canvas_orig.pack(side="right", padx=60)
 
@@ -151,8 +169,110 @@ class RecolourApp:
         with open(filename, "rb") as f:
             self.frm_data = f.read()
 
-        self.frm_type = filename[-4:-1]
-        self.frm_header, self.input_frames = parse_frames(self.frm_data)
+        self.frm_type = "FRM"
+        self.frm_header, self.input_frames = parse_frames(self.frm_data,self.frm_type)
+        self.output_frames = copy.deepcopy(self.input_frames)
+        self.frame_index = 0
+        self.display_frame()
+        
+    def load_fr0(self):
+        prefix = self.frm_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        in_dir = self.input_dir.get()
+        filename = os.path.join(in_dir, prefix + suffix + ".FR0")
+        if not os.path.exists(filename):
+            messagebox.showerror("Error", f"File not found: {filename}")
+            return
+        with open(filename, "rb") as f:
+            self.frm_data = f.read()
+
+        self.frm_type = "FR0"
+        self.frm_header, self.input_frames = parse_frames(self.frm_data,self.frm_type)
+        self.output_frames = copy.deepcopy(self.input_frames)
+        self.frame_index = 0
+        self.display_frame()
+        
+    def load_fr1(self):
+        prefix = self.frm_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        in_dir = self.input_dir.get()
+        filename = os.path.join(in_dir, prefix + suffix + ".FR1")
+        if not os.path.exists(filename):
+            messagebox.showerror("Error", f"File not found: {filename}")
+            return
+        with open(filename, "rb") as f:
+            self.frm_data = f.read()
+
+        self.frm_type = "FR1"
+        self.frm_header, self.input_frames = parse_frames(self.frm_data,self.frm_type)
+        self.output_frames = copy.deepcopy(self.input_frames)
+        self.frame_index = 0
+        self.display_frame()
+        
+    def load_fr2(self):
+        prefix = self.frm_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        in_dir = self.input_dir.get()
+        filename = os.path.join(in_dir, prefix + suffix + ".FR2")
+        if not os.path.exists(filename):
+            messagebox.showerror("Error", f"File not found: {filename}")
+            return
+        with open(filename, "rb") as f:
+            self.frm_data = f.read()
+
+        self.frm_type = "FR2"
+        self.frm_header, self.input_frames = parse_frames(self.frm_data,self.frm_type)
+        self.output_frames = copy.deepcopy(self.input_frames)
+        self.frame_index = 0
+        self.display_frame()
+        
+    def load_fr3(self):
+        prefix = self.frm_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        in_dir = self.input_dir.get()
+        filename = os.path.join(in_dir, prefix + suffix + ".FR3")
+        if not os.path.exists(filename):
+            messagebox.showerror("Error", f"File not found: {filename}")
+            return
+        with open(filename, "rb") as f:
+            self.frm_data = f.read()
+
+        self.frm_type = "FR3"
+        self.frm_header, self.input_frames = parse_frames(self.frm_data,self.frm_type)
+        self.output_frames = copy.deepcopy(self.input_frames)
+        self.frame_index = 0
+        self.display_frame()
+        
+    def load_fr4(self):
+        prefix = self.frm_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        in_dir = self.input_dir.get()
+        filename = os.path.join(in_dir, prefix + suffix + ".FR4")
+        if not os.path.exists(filename):
+            messagebox.showerror("Error", f"File not found: {filename}")
+            return
+        with open(filename, "rb") as f:
+            self.frm_data = f.read()
+
+        self.frm_type = "FR4"
+        self.frm_header, self.input_frames = parse_frames(self.frm_data,self.frm_type)
+        self.output_frames = copy.deepcopy(self.input_frames)
+        self.frame_index = 0
+        self.display_frame()
+        
+    def load_fr5(self):
+        prefix = self.frm_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        in_dir = self.input_dir.get()
+        filename = os.path.join(in_dir, prefix + suffix + ".FR5")
+        if not os.path.exists(filename):
+            messagebox.showerror("Error", f"File not found: {filename}")
+            return
+        with open(filename, "rb") as f:
+            self.frm_data = f.read()
+
+        self.frm_type = "FR5"
+        self.frm_header, self.input_frames = parse_frames(self.frm_data,self.frm_type)
         self.output_frames = copy.deepcopy(self.input_frames)
         self.frame_index = 0
         self.display_frame()
@@ -222,6 +342,66 @@ class RecolourApp:
         suffix = self.anim_type.get().upper()
         out_dir = self.output_dir.get()
         out_name = os.path.join(out_dir, out_prefix + suffix + ".FRM")
+        new_data = rebuild_frm(self.frm_header, self.output_frames)
+        with open(out_name, "wb") as f:
+            f.write(new_data)
+        messagebox.showinfo("Saved", f"Saved to {out_name}")
+        
+    def save_fr0(self):
+        out_prefix = self.out_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        out_dir = self.output_dir.get()
+        out_name = os.path.join(out_dir, out_prefix + suffix + ".FR0")
+        new_data = rebuild_frm(self.frm_header, self.output_frames)
+        with open(out_name, "wb") as f:
+            f.write(new_data)
+        messagebox.showinfo("Saved", f"Saved to {out_name}")
+        
+    def save_fr1(self):
+        out_prefix = self.out_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        out_dir = self.output_dir.get()
+        out_name = os.path.join(out_dir, out_prefix + suffix + ".FR1")
+        new_data = rebuild_frm(self.frm_header, self.output_frames)
+        with open(out_name, "wb") as f:
+            f.write(new_data)
+        messagebox.showinfo("Saved", f"Saved to {out_name}")
+        
+    def save_fr2(self):
+        out_prefix = self.out_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        out_dir = self.output_dir.get()
+        out_name = os.path.join(out_dir, out_prefix + suffix + ".FR2")
+        new_data = rebuild_frm(self.frm_header, self.output_frames)
+        with open(out_name, "wb") as f:
+            f.write(new_data)
+        messagebox.showinfo("Saved", f"Saved to {out_name}")
+        
+    def save_fr3(self):
+        out_prefix = self.out_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        out_dir = self.output_dir.get()
+        out_name = os.path.join(out_dir, out_prefix + suffix + ".FR3")
+        new_data = rebuild_frm(self.frm_header, self.output_frames)
+        with open(out_name, "wb") as f:
+            f.write(new_data)
+        messagebox.showinfo("Saved", f"Saved to {out_name}")
+        
+    def save_fr4(self):
+        out_prefix = self.out_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        out_dir = self.output_dir.get()
+        out_name = os.path.join(out_dir, out_prefix + suffix + ".FR4")
+        new_data = rebuild_frm(self.frm_header, self.output_frames)
+        with open(out_name, "wb") as f:
+            f.write(new_data)
+        messagebox.showinfo("Saved", f"Saved to {out_name}")
+        
+    def save_fr5(self):
+        out_prefix = self.out_prefix.get().upper()
+        suffix = self.anim_type.get().upper()
+        out_dir = self.output_dir.get()
+        out_name = os.path.join(out_dir, out_prefix + suffix + ".FR5")
         new_data = rebuild_frm(self.frm_header, self.output_frames)
         with open(out_name, "wb") as f:
             f.write(new_data)
